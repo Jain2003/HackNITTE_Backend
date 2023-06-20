@@ -4,10 +4,10 @@ home = Blueprint('home', __name__)
 
 
 @home.route('/getDetails')
-def hello():
+def getDetails():
     return jsonify({"data" : "InProgress"})
 
 
 @home.route('/modifyDetails')
-def hellos():
+def modifyDetails():
     return jsonify(({"data":  "InProgress"}))
