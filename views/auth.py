@@ -12,7 +12,8 @@ def login():
 def register():
     return jsonify({"data":  "InProgress"})
 
+
 @auth.route('/isLoggedIn')
-def isLoggedIn():
+def isloggedIn():
     return jsonify({"data": False})
 
