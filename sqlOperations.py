@@ -25,6 +25,14 @@ def createTables():
         return 0
     cursor.execute("create table if not exists admin(username varchar, password varchar)")
     con.commit()
+    cursor.execute("create table if not exists contest(name varchar, desc varchar, input varchar, output varchar, sample varchar)")
+    con.commit()
+    cursor.execute("create table if not exists contestDetails(name varchar, start varchar, id varchar)")
+    con.commit()
+    cursor.execute("create table if not exists user(name varchar, email varchar, rollno varchar, password varchar, codechef varchar, codeforces varchar, leetcode varchar, rcc varchar, rcf varchar, rlc varchar)")
+    con.commit()
+    cursor.execute("create table if not exists announcement(announcement varchar)")
+    con.commit()
     print("Tables are created")
     cursor.execute("select name from sqlite_master where type = 'table'")
     print("Tables")
@@ -81,3 +89,100 @@ def run_query(query,key):
 
     con.close()
     return str(result)
+
+
+def get_native_contests():
+    cursor,con = connect()
+    if con is None or cursor is None:
+        return 0
+    cursor.execute("select * from contest")
+    temp = []
+    for i in cursor:
+        temp.append(i)
+    Result = {}
+    ind = 0
+    for i in range(len(temp)):
+        Result[chr(ord('A')+i)] = temp[i]
+    return Result
+
+
+def get_native_contest_details():
+    cursor, con = connect()
+    if con is None or cursor is None:
+        return 0
+    cursor.execute("select  * from contestDetails")
+    result = []
+    for i in cursor:
+        result.append(i)
+        break
+    return result
+
+def regiter_user(data):
+    cursor, con = connect()
+    if con is None or cursor is None:
+        return 0
+    cursor.execute(f"select * from user where name = '{data[0]}'")
+    flag = 0
+    for i in cursor:
+        flag = 1
+        break
+    if flag:
+        return False
+    # try:
+    data[3] = hashlib.md5((data[3] + salt).encode()).hexdigest()
+    cursor.execute(f"insert into user values('{data[0]}','{data[1]}','{data[2]}','{data[3]}','{data[4]}','{data[5]}','{data[6]}','{data[7]}','{data[8]}','{data[9]}')")
+    con.commit()
+    return True
+    # except:
+    #     return False
+
+def login_user(username,password):
+    cursor, con = connect()
+    if con is None or cursor is None:
+        return 0
+    cursor.execute(f"select password from user where name = '{username}'")
+    passc = None
+    for i in cursor:
+        passc = i
+        break
+    if passc == None:
+        return False
+    hashed = hashlib.md5((password + salt).encode()).hexdigest()
+    if hashed == passc[0]:
+        return True
+    else:
+        return False
+
+def get_user_details(name):
+    cursor, con = connect()
+    if con is None or cursor is None:
+        return 0
+
+    cursor.execute(f"select * from user where name = '{name}' ")
+
+    for i in cursor:
+        res = [i[0],i[1],i[2],i[4],i[5],i[6],i[7],i[8],i[9]]
+        break
+    return res
+
+def get_all_user_details():
+    cursor, con = connect()
+    if con is None or cursor is None:
+        return 0
+
+    cursor.execute('select name,rcc,rcf,rlc,rollno from user')
+    R = []
+    for i in cursor:
+        if len(i) > 0:
+            R.append([int(i[1]) + int(i[2]) + int(i[3]), i[0], i[4]])
+    return R
+
+def get_announcement():
+    cursor, con = connect()
+    if con is None or cursor is None:
+        return 0
+    cursor.execute('select * from announcement')
+    res = ''
+    for i in cursor:
+        res = i[0]
+    return res
