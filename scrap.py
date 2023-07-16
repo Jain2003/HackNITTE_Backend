@@ -2,7 +2,7 @@ import requests as req
 from bs4 import BeautifulSoup as bs
 
 
-def scrap(cc, cf, lc):
+def scraprating(cc, cf, lc):
     Rating = []
     if cc != "":
         r = req.get(f"https://www.codechef.com/users/{cc}")
@@ -33,4 +33,62 @@ def scrap(cc, cf, lc):
         return "NO UserName Found or Error"
     else:
         return Rating
+    
+def scraprecent_usercontest(cc, cf):
+    scraprecent=[]
+    buffer = ["","","0"]
+    if cc != "":
+        ccscrap = []
+        requests = req.get(f"https://www.codechef.com/users/{cc}")
+        soup = bs(requests.content, 'html.parser')
+        box = soup.find(attrs= {'id':"rating-box-all" })
+        contestname = box.find('div', class_='contest-name')
+        links = box.find('a')
+        if links:
+            contest_name = links.get_text() 
+            contestlink = links['href'] if 'href' in links.attrs else None
+            globalrank = box.find('strong', class_ = 'global-rank')
+            rank = globalrank.get_text()
+            ccscrap.append(contest_name)
+            ccscrap.append(contestlink)
+            ccscrap.append(rank)
+        if ccscrap:
+            scraprecent.append(ccscrap)
+        else:
+            scraprecent.append(buffer)
+    if cf != "":
+        cfscrap = []
+        requests = req.get(f"https://codeforces.com/contests/with/{cf}")
+        soup = bs(requests.content, 'html.parser')
+        tables = soup.find('table', class_='tablesorter user-contests-table')
+        onlyvalues = tables.find('tbody')
+        firstrow = onlyvalues.find('tr')
+        tabcontent = []
+        values = firstrow.find_all('td')
+        for value in values:
+            tabcontent.append(value)
+
+        link = tabcontent[1]
+        links = link.find('a')
+        if links:
+            contest_name = links.get_text()
+            contest_name = contest_name.replace("\r", "")
+            contest_name = contest_name.replace("\n", "")
+            contest_name = contest_name.replace("                    ", "")
+            contest_link = links['href'] if 'href' in links.attrs else None
+            contestlink = "https://codeforces.com" + contest_link
+        
+        rank = tabcontent[3].get_text()
+        cfscrap.append(contest_name)
+        cfscrap.append(contestlink)
+        cfscrap.append(rank)
+        if cfscrap:
+            scraprecent.append(cfscrap)
+        else:
+            scraprecent.append(buffer)
+
+    if not scraprecent:
+        return "NO UserName Found or Error"
+    else:
+        return scraprecent
 
